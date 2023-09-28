@@ -1,4 +1,4 @@
-package com.example.application.component.crud;
+package com.example.application.component.data;
 
 import com.example.application.dao.FuncionarioDAO;
 import com.example.application.dto.FuncionarioDTO;

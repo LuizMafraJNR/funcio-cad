@@ -1,12 +1,13 @@
-package com.example.application.component.crud.data;
+package com.example.application.component.data;
 
 import com.example.application.dao.DepartamentoDAO;
 import com.example.application.dto.DepartamentoDTO;
 import com.vaadin.flow.component.crud.CrudFilter;
 import com.vaadin.flow.data.provider.AbstractBackEndDataProvider;
-import com.vaadin.flow.data.provider.AbstractDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.provider.SortDirection;
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Repository;
 
 import java.lang.reflect.Field;
 import java.sql.SQLException;
@@ -16,7 +17,6 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
-
 public class DepartamentoDataProvider extends AbstractBackEndDataProvider<DepartamentoDTO, CrudFilter> {
     @Override
     protected Stream<DepartamentoDTO> fetchFromBackEnd(Query<DepartamentoDTO, CrudFilter> query) {

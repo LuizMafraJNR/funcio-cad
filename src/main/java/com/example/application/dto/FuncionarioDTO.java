@@ -12,6 +12,15 @@ public class FuncionarioDTO{
     private LocalDate dataNascimento;
     private LocalDate dataAdmissao;
     private String status;
+    private String departamento;
+
+    public String getDepartamento() {
+        return departamento;
+    }
+
+    public void setDepartamento(String departamento) {
+        this.departamento = departamento;
+    }
 
     public Integer getRg() {
         return rg;
@@ -83,11 +92,11 @@ public class FuncionarioDTO{
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         FuncionarioDTO that = (FuncionarioDTO) o;
-        return id == that.id && Objects.equals(nome, that.nome) && Objects.equals(rg, that.rg) && Objects.equals(cargo, that.cargo) && Objects.equals(salario, that.salario) && Objects.equals(dataNascimento, that.dataNascimento) && Objects.equals(dataAdmissao, that.dataAdmissao) && Objects.equals(status, that.status);
+        return Objects.equals(id, that.id) && Objects.equals(nome, that.nome) && Objects.equals(rg, that.rg) && Objects.equals(cargo, that.cargo) && Objects.equals(salario, that.salario) && Objects.equals(dataNascimento, that.dataNascimento) && Objects.equals(dataAdmissao, that.dataAdmissao) && Objects.equals(status, that.status) && Objects.equals(departamento, that.departamento);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, nome, rg, cargo, salario, dataNascimento, dataAdmissao, status);
+        return Objects.hash(id, nome, rg, cargo, salario, dataNascimento, dataAdmissao, status, departamento);
     }
 }

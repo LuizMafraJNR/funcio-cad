@@ -30,6 +30,7 @@ public class DepartamentoDAO {
                 departamento.setNome(resultSet.getString("nome"));
                 departamento.setStatus(resultSet.getInt("status"));
 
+
                 departamentos.add(departamento);
             }
         } catch (SQLException e) {

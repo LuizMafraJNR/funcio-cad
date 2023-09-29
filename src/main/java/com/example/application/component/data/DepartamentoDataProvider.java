@@ -6,8 +6,6 @@ import com.vaadin.flow.component.crud.CrudFilter;
 import com.vaadin.flow.data.provider.AbstractBackEndDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.provider.SortDirection;
-import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Repository;
 
 import java.lang.reflect.Field;
 import java.sql.SQLException;

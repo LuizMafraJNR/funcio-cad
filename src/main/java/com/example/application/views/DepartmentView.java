@@ -2,10 +2,13 @@ package com.example.application.views;
 
 import com.example.application.component.data.DepartamentoDataProvider;
 import com.example.application.dto.DepartamentoDTO;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 import java.util.List;
 
@@ -14,6 +17,7 @@ public class DepartmentView extends Div {
 
     private DepartamentoDataProvider departamentoDataProvider = new DepartamentoDataProvider();
     public DepartmentView() {
+
         Grid<DepartamentoDTO> grid = new Grid<>(DepartamentoDTO.class, false);
         grid.addColumn(DepartamentoDTO::getNome).setHeader("Departamento");
         grid.addComponentColumn(departamentoDTO ->  createStatusIcon(departamentoDTO))
@@ -25,7 +29,13 @@ public class DepartmentView extends Div {
         grid.setSelectionMode(Grid.SelectionMode.NONE);
         grid.setMinWidth("97vw");
         grid.setMinHeight("400px");
-        add(grid);
+
+        Button adicionaDepartamento = new Button("Adicionar Departamento", VaadinIcon.PLUS.create());
+        HorizontalLayout footer = new HorizontalLayout(adicionaDepartamento);
+        footer.setAlignItems(FlexComponent.Alignment.CENTER);
+        footer.getThemeList().clear();
+
+        add(grid,footer);
     }
 
     private Icon createStatusIcon(DepartamentoDTO departamentoDTO){

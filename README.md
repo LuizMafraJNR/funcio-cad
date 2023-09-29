@@ -13,3 +13,7 @@ O FunciCad é um sistema de cadastro de funcionários projetado para facilitar a
 - Deve ser possível inserir informações pessoais dos funcionários, incluindo nome, RG, data de nascimento, cargo, salário, data de admissão e status.
 - Deve ser possível associar cada funcionário a um departamento específico.
 - Após o cadastro, os detalhes do funcionário devem ser visíveis na lista de funcionários.
+
+## Diagrama de classes
+
+![Diagrama de classes](src/main/resources/FuncioCad.png)

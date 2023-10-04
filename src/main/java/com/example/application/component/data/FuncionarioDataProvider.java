@@ -113,6 +113,9 @@ public class FuncionarioDataProvider extends AbstractBackEndDataProvider<Funcion
 
         final Optional<FuncionarioDTO> existingItem = find(funcionarioDTO.getId());
         if (existingItem.isPresent()) {
+            int position = DATABASE.indexOf(existingItem.get());
+            DATABASE.remove(existingItem.get());
+            DATABASE.add(position, funcionarioDTO);
             FuncionarioDTO revealFuncionario = FuncionarioDAO.buscarFuncionarioPorId(existingItem.get().getId(), funcionarioDTO);
             FuncionarioDAO.atualizaFuncionario(revealFuncionario);
         } else {

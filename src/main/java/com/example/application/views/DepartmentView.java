@@ -2,72 +2,91 @@ package com.example.application.views;
 
 import com.example.application.component.data.DepartamentoDataProvider;
 import com.example.application.dto.DepartamentoDTO;
-import com.example.application.dto.FuncionarioDTO;
-import com.vaadin.flow.component.Html;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.crud.BinderCrudEditor;
 import com.vaadin.flow.component.crud.Crud;
+import com.vaadin.flow.component.crud.CrudEditor;
+import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Binder;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class DepartmentView extends Div {
 
+    private String DEPARTAMENTO_NOME = "nome";
+    private String STATUS = "status";
+    private Crud<DepartamentoDTO> crud;
+    private DepartamentoDataProvider departamentoDataProvider;
 
-    private DepartamentoDataProvider departamentoDataProvider = new DepartamentoDataProvider();
     public DepartmentView() {
+        crud = new Crud<>(DepartamentoDTO.class, createEditor());
 
-        Grid<DepartamentoDTO> grid = new Grid<>(DepartamentoDTO.class, false);
-        grid.addColumn(DepartamentoDTO::getNome).setHeader("Departamento");
-        grid.addComponentColumn(departamentoDTO ->  createStatusIcon(departamentoDTO))
-                .setTooltipGenerator(departamentoDTO -> departamentoDTO.isAtivo() ? "Ativo" : "Inativo")
-                .setHeader("Status");
+        setupGrid();
+        setupDataProvider();
+        setupToolbar();
 
-        List<DepartamentoDTO> departamentos = departamentoDataProvider.DATABASE;
-        grid.setItems(departamentos);
-        grid.setSelectionMode(Grid.SelectionMode.NONE);
-        grid.setMinWidth("97vw");
-        grid.setMinHeight("400px");
-
-//        Button adicionaDepartamento = new Button("Adicionar Departamento", VaadinIcon.PLUS.create());
-//        HorizontalLayout footer = new HorizontalLayout(adicionaDepartamento);
-//        footer.setAlignItems(FlexComponent.Alignment.AUTO);
-//        footer.getStyle().set("flex-wrap", "wrap");
-//        footer.getThemeList().clear();
-
-
-        Button button = new Button("Novo Departamento", VaadinIcon.PLUS.create());
-        button.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-
-        HorizontalLayout toolbar = new HorizontalLayout();
-        toolbar.setAlignItems(FlexComponent.Alignment.CENTER);
-        toolbar.setFlexGrow(1, button);
-        toolbar.setSpacing(false);
-
-        add(grid,button);
+        add(crud);
     }
 
     private void setupToolbar() {
-
-
+        Button button = new Button("Novo departamento", VaadinIcon.PLUS.create());
+        button.addClickListener(event -> {
+            crud.edit(new DepartamentoDTO(), Crud.EditMode.NEW_ITEM);
+        });
+        button.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        crud.setNewButton(button);
     }
 
-    private Icon createStatusIcon(DepartamentoDTO departamentoDTO){
-        Boolean isAtivo = departamentoDTO.isAtivo();
-        Icon icon;
-        if (isAtivo){
-            icon = VaadinIcon.CHECK.create();
-            icon.getElement().getThemeList().add("badge success");
-        } else {
-            icon = VaadinIcon.CLOSE_SMALL.create();
-            icon.getElement().getThemeList().add("badge error");
-        }
-        icon.getStyle().set("padding", "var(--lumo-space-xs)");
-        return icon;
+    private void setupDataProvider() {
+        departamentoDataProvider = new DepartamentoDataProvider();
+        crud.setDataProvider(departamentoDataProvider);
+        crud.addDeleteListener(
+                deleteEvent -> departamentoDataProvider.delete(deleteEvent.getItem()));
+        crud.addSaveListener(
+                saveEvent -> departamentoDataProvider.persist(saveEvent.getItem()));
+    }
+
+    private void setupGrid() {
+        Grid<DepartamentoDTO> grid = crud.getGrid();
+
+        // Only show these columns (all columns shown by default):
+        List<String> visibleColumns = Arrays.asList(DEPARTAMENTO_NOME, STATUS);
+        grid.getColumns().forEach(column -> {
+            String key = column.getKey();
+            if (!visibleColumns.contains(key)) {
+                grid.removeColumn(column);
+            }
+        });
+
+        // Reorder the columns (alphabetical by default)
+        grid.setColumnOrder(grid.getColumnByKey(DEPARTAMENTO_NOME),
+                grid.getColumnByKey(STATUS));
+
+        grid.setMinWidth("96vw");
+    }
+
+    private CrudEditor<DepartamentoDTO> createEditor() {
+        TextField nome = new TextField("Nome departamento");
+        ComboBox<String> status = new ComboBox<>("Status");
+        status.setItems(getStatus());
+
+        FormLayout form = new FormLayout(nome, status);
+
+        Binder<DepartamentoDTO> binder = new Binder<>(DepartamentoDTO.class);
+        binder.forField(nome).asRequired().bind(DepartamentoDTO::getNome, DepartamentoDTO::setNome);
+        binder.forField(status).asRequired().bind(DepartamentoDTO::getStatus, DepartamentoDTO::setStatus);
+
+        return new BinderCrudEditor<>(binder, form);
+    }
+
+    private List<String> getStatus() {
+        return List.of("Ativo", "Inativo");
     }
 }

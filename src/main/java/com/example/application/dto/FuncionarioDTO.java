@@ -12,13 +12,13 @@ public class FuncionarioDTO{
     private LocalDate dataNascimento;
     private LocalDate dataAdmissao;
     private String status;
-    private String departamento;
+    private DepartamentoDTO departamento;
 
-    public String getDepartamento() {
+    public DepartamentoDTO getDepartamento() {
         return departamento;
     }
 
-    public void setDepartamento(String departamento) {
+    public void setDepartamento(DepartamentoDTO departamento) {
         this.departamento = departamento;
     }
 

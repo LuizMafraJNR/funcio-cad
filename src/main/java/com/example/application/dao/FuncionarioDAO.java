@@ -25,8 +25,8 @@ public class FuncionarioDAO {
             }
 
             String sql = """
-                INSERT INTO funcionario(nome, rg, cargo, salario, dataNascimento, dataAdmissao, status, departamento_id)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+                INSERT INTO funcionario(nome, rg, cargo, salario, dataNascimento, dataAdmissao, departamento_id)
+                VALUES (?, ?, ?, ?, ?, ?, ?);
                 """;
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, funcionarioDTO.getNome());
@@ -35,8 +35,7 @@ public class FuncionarioDAO {
             preparedStatement.setDouble(4, funcionarioDTO.getSalario());
             preparedStatement.setDate(5, Date.valueOf(funcionarioDTO.getDataNascimento()));
             preparedStatement.setDate(6, Date.valueOf(funcionarioDTO.getDataAdmissao()));
-            preparedStatement.setString(7, funcionarioDTO.getStatus());
-            preparedStatement.setInt(8, departamentoId);
+            preparedStatement.setInt(7, funcionarioDTO.getDepartamento().getId());
             preparedStatement.executeUpdate();
         } finally {
             if (preparedStatement != null) {
@@ -74,10 +73,6 @@ public class FuncionarioDAO {
 
     public static void atualizaFuncionario(FuncionarioDTO funcionarioDTO) throws SQLException {
         try {
-
-            /***
-             * Assasinando alguns pandas para poder dar certo
-             */
             List<DepartamentoDTO> departamentoDTOList = DepartamentoDAO.listarDepartamentos();
             Integer departamentoId = 0;
             for (DepartamentoDTO departamentoDTO : departamentoDTOList) {
@@ -88,7 +83,7 @@ public class FuncionarioDAO {
 
             connection = ConnectionMyDataBase.getConnection();
             String sql = """
-                UPDATE funcionario SET nome = ?, rg = ?, cargo = ?, salario = ?, dataNascimento = ?, dataAdmissao = ?, status = ?, departamento_id = ?
+                UPDATE funcionario SET nome = ?, rg = ?, cargo = ?, salario = ?, dataNascimento = ?, dataAdmissao = ?, departamento_id = ?
                 WHERE id = ?
                 """;
             preparedStatement = connection.prepareStatement(sql);
@@ -98,9 +93,8 @@ public class FuncionarioDAO {
             preparedStatement.setDouble(4, funcionarioDTO.getSalario());
             preparedStatement.setDate(5, Date.valueOf(funcionarioDTO.getDataNascimento()));
             preparedStatement.setDate(6, Date.valueOf(funcionarioDTO.getDataAdmissao()));
-            preparedStatement.setString(7, funcionarioDTO.getStatus());
-            preparedStatement.setInt(8, departamentoId); // Defina o departamento_id
-            preparedStatement.setInt(9, funcionarioDTO.getId());
+            preparedStatement.setInt(7, funcionarioDTO.getDepartamento().getId());
+            preparedStatement.setInt(8, funcionarioDTO.getId());
             preparedStatement.executeUpdate();
         } finally {
             if (preparedStatement != null) {
@@ -131,19 +125,11 @@ public class FuncionarioDAO {
                 funcionario.setRg(resultSet.getInt("rg"));
                 funcionario.setCargo(resultSet.getString("cargo"));
                 funcionario.setSalario(resultSet.getDouble("salario"));
-                funcionario.setStatus(resultSet.getString("status"));
                 funcionario.setDataNascimento(resultSet.getDate("dataNascimento").toLocalDate());
                 funcionario.setDataAdmissao(resultSet.getDate("dataAdmissao").toLocalDate());
+                DepartamentoDTO departamentoDTO = DepartamentoDAO.buscarDepartamento(resultSet.getInt("departamento_id"));
+                funcionario.setDepartamento(departamentoDTO);
 
-                /***
-                 * Novamente assasinando alguns pandas para poder dar certo.
-                 */
-                Integer idDepartment = resultSet.getInt("departamento_id");
-                for (DepartamentoDTO departamentoDTO : departamentoDTOList) {
-                    if (departamentoDTO.getId().equals(idDepartment)) {
-                        funcionario.setDepartamento(departamentoDTO.getNome());
-                    }
-                }
                 funcionarios.add(funcionario);
             }
         } catch (SQLException e) {

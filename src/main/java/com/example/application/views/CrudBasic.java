@@ -2,6 +2,7 @@ package com.example.application.views;
 
 import com.example.application.component.data.FuncionarioDataProvider;
 import com.example.application.component.data.DepartamentoDataProvider;
+import com.example.application.dao.DepartamentoDAO;
 import com.example.application.dto.DepartamentoDTO;
 import com.example.application.dto.FuncionarioDTO;
 import com.vaadin.flow.component.Html;
@@ -44,10 +45,8 @@ public class CrudBasic extends Div {
     private String SALARIO = "salario";
     private String DATA_NASCIMENTO = "dataNascimento";
     private String DATA_ADMISSAO = "dataAdmissao";
-    private String STATUS = "status";
-    private String DEPARTAMENTO = "departamento";
+    private String DEPARTAMENTO_ID = "departamento_id";
     private String EDIT_COLUMN = "vaadin-crud-edit-column";
-
 
 
     public CrudBasic() throws SQLException {
@@ -85,7 +84,7 @@ public class CrudBasic extends Div {
         grid.setMinWidth("98vw");
         grid.setHeight("800px");
 
-        List<String> visibleColumns = Arrays.asList(ID,NOME,RG,CARGO,DEPARTAMENTO,SALARIO,DATA_NASCIMENTO,DATA_ADMISSAO,STATUS,EDIT_COLUMN);
+        List<String> visibleColumns = Arrays.asList(ID,NOME,RG,CARGO,SALARIO,DATA_NASCIMENTO,DATA_ADMISSAO,EDIT_COLUMN);
         grid.getColumns().forEach(column -> {
             String key = column.getKey();
             if(!visibleColumns.contains(key)){
@@ -97,33 +96,34 @@ public class CrudBasic extends Div {
                 grid.getColumnByKey(NOME),
                 grid.getColumnByKey(RG),
                 grid.getColumnByKey(CARGO),
-                grid.getColumnByKey(DEPARTAMENTO),
                 grid.getColumnByKey(SALARIO),
                 grid.getColumnByKey(DATA_NASCIMENTO),
                 grid.getColumnByKey(DATA_ADMISSAO),
-                grid.getColumnByKey(STATUS),
                 grid.getColumnByKey(EDIT_COLUMN));
+
+        grid.setMinWidth("98vw");
     }
 
-    private CrudEditor<FuncionarioDTO> createEditor() {
+    private CrudEditor<FuncionarioDTO> createEditor() throws SQLException {
         TextField nome = new TextField("Nome");
         IntegerField rg = new IntegerField("Registro Geral");
         NumberField salario = new NumberField("Salario");
         TextField cargo = new TextField("Cargo");
-        ComboBox<String> departamento = new ComboBox<>("Departamento");
-        /***
-         * Tentei setar um atrbuto para a minha entidade FuncionarioDTO que tinha o tipo DepartamentoDTO
-         * mas acabou não dando muito certo de como eu poderia manipular isso ou pelo menos não deixou muito claro no
-         * tutorial do Vaadin então eu adaptei para o nosso estilo brasileiro de gambiarra, veras alguns comentarios no
-         * @Class(FuncionarioDAO.java)
-         */
-        departamento.setItems(getDepartamentos());
         DatePicker dataNascimento = new DatePicker("Data de Nascimento");
         DatePicker dataAdmissao = new DatePicker("Data de Admissão");
-        TextField status = new TextField("Status");
+        ComboBox<DepartamentoDTO> departamento = new ComboBox<>("Departamento");
+        departamento.addAttachListener(event -> {
+            try {
+                departamento.setItems(DepartamentoDAO.listarDepartamentos());
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
+//        departamento.setItems(DepartamentoDAO.listarDepartamentos());
+        departamento.setItemLabelGenerator(DepartamentoDTO::getNome);
 
 
-        FormLayout form = new FormLayout(nome,rg,salario,departamento,cargo,dataNascimento,dataAdmissao,status);
+        FormLayout form = new FormLayout(nome,rg,salario,cargo,dataNascimento,dataAdmissao,departamento);
         form.setColspan(departamento, 2);
         form.setMaxWidth("480px");
         form.setResponsiveSteps(new FormLayout.ResponsiveStep("0",1),
@@ -134,10 +134,9 @@ public class CrudBasic extends Div {
         binder.forField(rg).asRequired().bind(FuncionarioDTO::getRg, FuncionarioDTO::setRg);
         binder.forField(salario).asRequired().bind(FuncionarioDTO::getSalario, FuncionarioDTO::setSalario);
         binder.forField(cargo).asRequired().bind(FuncionarioDTO::getCargo, FuncionarioDTO::setCargo);
-        binder.forField(departamento).asRequired().bind(FuncionarioDTO::getDepartamento, FuncionarioDTO::setDepartamento);
         binder.forField(dataNascimento).asRequired().bind(FuncionarioDTO::getDataNascimento, FuncionarioDTO::setDataNascimento);
         binder.forField(dataAdmissao).asRequired().bind(FuncionarioDTO::getDataAdmissao, FuncionarioDTO::setDataAdmissao);
-        binder.forField(status).asRequired().bind(FuncionarioDTO::getStatus, FuncionarioDTO::setStatus);
+        binder.forField(departamento).asRequired().bind(FuncionarioDTO::getDepartamento, FuncionarioDTO::setDepartamento);
 
         return new BinderCrudEditor<>(binder,form);
     }
@@ -145,6 +144,7 @@ public class CrudBasic extends Div {
     private void setupToolbar() {
         Html total = new Html("<span>Quantidade de Funcionarios <b>" + dataProvider.DATABASE.size()
                 + "</b> </span>");
+
 
         Button button = new Button("Novo Funcionario", VaadinIcon.PLUS.create());
         button.addClickListener(event -> {
@@ -158,14 +158,5 @@ public class CrudBasic extends Div {
         toolbar.setFlexGrow(1, toolbar);
         toolbar.setSpacing(false);
         crud.setToolbar(toolbar);
-    }
-
-    private static List<String> getDepartamentos(){
-        List<DepartamentoDTO> departamentoDTOList = departamentoDataProvider.DATABASE;
-        List<String> departamentos = new ArrayList<>();
-        for (DepartamentoDTO departamentoDTO : departamentoDTOList) {
-            departamentos.add(departamentoDTO.getNome());
-        }
-        return departamentos;
     }
 }

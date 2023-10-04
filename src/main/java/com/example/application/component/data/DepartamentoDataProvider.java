@@ -12,9 +12,13 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+
+import static java.util.Comparator.naturalOrder;
+
 public class DepartamentoDataProvider extends AbstractBackEndDataProvider<DepartamentoDTO, CrudFilter> {
     @Override
     protected Stream<DepartamentoDTO> fetchFromBackEnd(Query<DepartamentoDTO, CrudFilter> query) {
@@ -97,4 +101,62 @@ public class DepartamentoDataProvider extends AbstractBackEndDataProvider<Depart
                 }).reduce(Comparator::thenComparing).orElse((o1, o2) -> 0);
     }
 
+    public void persist(DepartamentoDTO item) {
+        if (item.getId() == null) {
+            item.setId(DATABASE.stream().map(DepartamentoDTO::getId).max(naturalOrder())
+                    .orElse(0) + 1);
+        }
+
+        final Optional<DepartamentoDTO> existingItem = find(item.getId());
+        if (existingItem.isPresent()) {
+            int position = DATABASE.indexOf(existingItem.get());
+            DATABASE.remove(existingItem.get());
+            DATABASE.add(position, item);
+            DepartamentoDTO departamento;
+            try {
+                departamento = DepartamentoDAO.buscarDepartamento(item.getId());
+            } catch (SQLException e) {
+                throw new RuntimeException("Erro ao tentar buscar o departamento");
+            }
+            try {
+                DepartamentoDAO.atualizarDepartamento(departamento);
+            } catch (SQLException e) {
+                throw new RuntimeException("Erro ao tentar atualizar o departamento");
+            }
+        } else {
+            DATABASE.add(item);
+            try {
+                DepartamentoDAO.inserirDepartamento(item);
+            } catch (SQLException e) {
+                throw new RuntimeException("Erro ao tentar inserir o departamento");
+            }
+        }
+
+        DATABASE.clear();
+        try {
+            DATABASE.addAll(DepartamentoDAO.listarDepartamentos());
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao tentar listar os departamentos");
+        }
+    }
+
+    Optional<DepartamentoDTO> find(Integer id) {
+        return DATABASE.stream().filter(entity -> entity.getId().equals(id))
+                .findFirst();
+    }
+
+    public void delete(DepartamentoDTO item) {
+        DATABASE.removeIf(entity -> entity.getId().equals(item.getId()));
+        try {
+            DepartamentoDAO.deletarDepartamento(item.getId());
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao tentar deletar o departamento");
+        }
+        DATABASE.clear();
+        try {
+            DATABASE.addAll(DepartamentoDAO.listarDepartamentos());
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao tentar listar os departamentos");
+        }
+    }
 }

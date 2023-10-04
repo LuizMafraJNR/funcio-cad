@@ -5,21 +5,21 @@ import java.util.List;
 public class DepartamentoDTO {
     private Integer id;
     private String nome;
-    private Integer status;
+    private String status;
 
     public Boolean isAtivo(){
-        if (this.status == 1){
+        if (this.status.equals("Ativo")){
             return true;
         } else {
             return false;
         }
     }
 
-    public Integer getStatus() {
+    public String getStatus() {
         return status;
     }
 
-    public void setStatus(Integer status) {
+    public void setStatus(String status) {
         this.status = status;
     }
 

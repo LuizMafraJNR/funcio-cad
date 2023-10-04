@@ -70,3 +70,5 @@ VALUES
   ('Ana Rodrigues', 555666777, 'Designer', 3200.00, '1992-03-28', '2023-09-25', 1);
 
 ```
+
+Java 20 e MySQLConnector.
